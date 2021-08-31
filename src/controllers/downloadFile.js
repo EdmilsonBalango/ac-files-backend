@@ -7,20 +7,11 @@ const os = require('os')
 
 router.post('/', async (req, res) =>{
     var {google_file_id, kind} = req.body
-    const filePath = path.join(os.tmpdir())
-    var dest = fs.createWriteStream('../../temp/download.pdf')
-    drive.files.export({
-        fileId: google_file_id,
-        mimeType: kind
-    }, {responseType: 'stream'})
-    .on('end', function (){
-        return res.json('Done')
+    drive.files.get({fileId: google_file_id, fields: '*'}, (err, result) =>{
+        if(err){
+            return res.json({Error: err})
+        }
+        return res.json(result)
     })
-    .on('error', function(err){
-        return res.json('error during download, ', err)
-    })  
-        .pipe(dest);
-
 })
-
 module.exports = app => app.use('/downloadfile', router)
